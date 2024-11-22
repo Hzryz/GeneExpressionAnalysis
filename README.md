@@ -1,3 +1,3 @@
 # GeneExpressionAnalysis
 
-Detail for thisproject will be updated later
+Detail for this project will be update later
