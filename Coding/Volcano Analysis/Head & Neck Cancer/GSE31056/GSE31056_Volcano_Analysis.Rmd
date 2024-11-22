@@ -1,0 +1,75 @@
+---
+title: "GSE31056_Analysis"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2024-11-05"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Load library
+```{r}
+library(tidyverse)
+```
+# Load data
+```{r}
+# Load data
+GSE31056_ori <- read_delim("/Users/amethyst/FYP/Data/Head & Neck Cancer/GSE31056/GSE31056_filtered.tsv")
+
+#Extract pvalue, gene symbol and logfc
+GSE31056_edited <- GSE31056_ori[,c(9,6,3)]
+
+write.table(GSE31056_edited, "~/FYP/Data/Head & Neck Cancer/GSE31056/GSE31056_edited.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+
+# Display top few rows
+head(GSE31056_edited)
+```
+# Volcano analysis
+```{r}
+# Transform p value to -log10
+GSE31056_edited$lgtranspvalue <- -log10(GSE31056_edited$P.Value)
+head(GSE31056_edited)
+
+# Set the volcano plot parameter
+par(pch = 16) # solid dot
+par(pty = "s") # square plot
+
+# Plotting the figures
+plot(GSE31056_edited$logFC, GSE31056_edited$lgtranspvalue, main='\n Diffrentially expressed Gene Analysis: GSE31056\n Tumor (n = 23) vs Control (n = 24)\n -log10(p-value) > 2 & |log2FC| > 1\n', xlab=expression('lg'[2]*'FC'), ylab=expression('-lg'[10]*'pvalue'),cex.lab=1.2)
+
+# For down-regulated genes
+# logFC < 0 because any numbers cannot divided by 0
+# 2/-logFC; the "2" here refers to p-value = 0.01
+with(subset(GSE31056_edited, logFC < 0 & lgtranspvalue >= (2/-logFC)), points(logFC, lgtranspvalue, col = "red"))
+
+# For up-regulated genes
+with(subset(GSE31056_edited, logFC > 0 & lgtranspvalue >= (2/logFC)), points(logFC, lgtranspvalue, col = "blue"))
+
+# Add legend
+#legend("bottomright",legend=c(expression(paste('DOWN: lg'[2]*'FC<1 & -lg'[10]*'pvalue>=(2/-lg'[2]*'FC)')), expression(paste('UP: lg'[2]*'FC>1 & -lg'[10]*'pvalue>=(2/lg'[2]*'FC)'))),pch = 16, col=c("red", "blue"))
+
+# Draw the line
+xpos <- seq(0, 6, 0.01)
+xneg <- seq(-6, 0, 0.01)
+points(xpos, 2/xpos, type="l")
+points(xneg, -2/xneg, type="l")
+```
+
+# Down-regulated genes
+```{r}
+# Extract Down-regulated genes
+GSE_DOWN <- subset(GSE31056_edited, logFC < 0 & lgtranspvalue >= (2/-logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
+GSE_DOWN <- GSE_DOWN[order(GSE_DOWN$logFC), ]
+head(GSE_DOWN)
+
+write.table(GSE_DOWN, "~/FYP/Output/Head & Neck Cancer/GSE31056/GSE31056_DN.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+```
+# Up-regulated genes
+```{r}
+# Extract Up-regulated genes
+GSE_UP <- subset(GSE31056_edited, logFC > 0 & lgtranspvalue >= (2/logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
+GSE_UP <- GSE_UP[order(GSE_UP$logFC, decreasing = TRUE), ]
+head(GSE_UP)
+
+write.table(GSE_UP, "~/FYP/Output/Head & Neck Cancer/GSE31056/GSE31056_UP.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+```

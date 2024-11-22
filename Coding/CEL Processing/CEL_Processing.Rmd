@@ -1,0 +1,53 @@
+---
+title: "CEL_Processing"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2024-11-05"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+# Load the affy library
+library(affy)
+
+# Specify the path to the folder containing your CEL files
+cel_folder <- "/Users/amethyst/FYP/Data/Servical Cancer/GSE63678/GSE63678_CEL"
+
+# Retrieve all CEL files from the specified folder
+cel_files <- list.files(cel_folder, pattern = "\\.CEL$", full.names = TRUE)
+
+# Check if any CEL files were found
+if (length(cel_files) == 0) {
+  stop("No CEL files found in the specified folder.")
+}
+
+# Read the CEL files
+data <- ReadAffy(celfile.path = cel_folder)
+
+# Check the dimensions and summary of the data
+print(dim(data))  # Print dimensions of the data
+print(summary(data))  # Print summary of the data
+
+# Normalize the data using RMA
+normalized_data <- rma(data)
+
+# Write normalized data to a file or perform further analysis
+normalized_expression <- exprs(normalized_data)
+
+# Convert the normalized_expression to a data frame
+normalized_expression_df <- as.data.frame(normalized_expression)
+
+# Add row names as a new column
+normalized_expression_df <- cbind(ID = rownames(normalized_expression_df), normalized_expression_df)
+
+# Write the data frame to a TSV file
+write.table(normalized_expression_df, 
+            "~/FYP/Data/Servical Cancer/GSE63678/GSE63678_normal_expression.tsv", 
+            quote = FALSE, 
+            sep = '\t', 
+            row.names = FALSE)
+
+# Print completion message
+cat("Normalized data with gene IDs saved to 'GSE63678_normal_expression.tsv'.\n")
+```

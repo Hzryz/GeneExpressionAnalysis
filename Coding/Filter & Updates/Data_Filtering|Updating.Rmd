@@ -1,0 +1,179 @@
+---
+title: "Data_Filtering|Data_Updating"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2024-11-05"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Load library
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(AnnotationDbi)
+library(hgu133plus2.db)
+library(org.Hs.eg.db)  # for HGNC gene names
+library(biomaRt)  # for Ensembl gene names
+```
+# Define and load data
+```{r}
+# Define the input and output file paths
+input_file <- "/Users/amethyst/FYP/Data/Head & Neck Cancer/GSE31056/GSE31056_raw.tsv" 
+output_file <- "/Users/amethyst/FYP/Data/Head & Neck Cancer/GSE31056/GSE31056_filtered.tsv" 
+
+# Read the TSV file with error handling
+data <- tryCatch({
+  read.delim(input_file, header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+}, error = function(e) {
+  cat("Error reading the input file:", e$message, "\n")
+  stop("Terminating script due to input file error.")
+})
+```
+# Data filtering process
+```{r}
+# Create a new column 'abslogFC' with absolute values from 'logFC'
+data <- data %>%
+  mutate(abslogFC = abs(logFC))
+
+# Sort data by 'gene_symbol' and then by 'abslogFC'
+data <- data %>%
+  arrange(Gene.symbol, desc(abslogFC))
+
+# Remove duplicates while retaining the top value
+data_filtered <- data %>%
+  filter(!is.na(Gene.symbol)) %>%  # Remove rows with NA in Gene.symbol
+  distinct(Gene.symbol, .keep_all = TRUE)
+
+# Remove the 'abslogFC' column
+data_filtered <- data_filtered %>%
+  dplyr::select(-abslogFC)
+
+# Display top few rows
+head(data_filtered)
+```
+# Data cleaning
+```{r}
+# Clean up the ProbeID column to remove any leading or trailing whitespace
+data_filtered$ID <- trimws(data_filtered$ID)
+
+# Convert probe IDs to lowercase to ensure case-insensitive matching
+data_filtered$ID <- tolower(data_filtered$ID)
+```
+# Retrieve data mapping
+```{r}
+# Map probe IDs to gene symbols and gene titles using multiple libraries
+gene_symbols_hgu133 <- mapIds(
+  x = hgu133plus2.db,
+  keys = data_filtered$ID,
+  column = "SYMBOL",  # Retrieve gene symbols
+  keytype = "PROBEID",
+  multiVals = "list"  # Get all associated gene names as a list
+)
+
+gene_titles_hgu133 <- mapIds(
+  x = hgu133plus2.db,
+  keys = data_filtered$ID,
+  column = "GENENAME",  # Retrieve gene titles
+  keytype = "PROBEID",
+  multiVals = "list"  # Get all associated gene titles as a list
+)
+
+entrez_ids <- mapIds(
+  x = hgu133plus2.db,
+  keys = data_filtered$ID,
+  column = "ENTREZID",  # Retrieve ENTREZ gene IDs
+  keytype = "PROBEID",
+  multiVals = "list"  # Get all associated ENTREZ gene IDs as a list
+)
+
+gene_symbols_orgHs_eg <- mapIds(
+  x = org.Hs.eg.db,
+  keys = unlist(entrez_ids),  # Use the ENTREZ gene IDs as keys
+  column = "SYMBOL",  # Retrieve gene symbols
+  keytype = "ENTREZID",
+  multiVals = "list"  # Get all associated gene names as a list
+)
+
+gene_titles_orgHs_eg <- mapIds(
+  x = org.Hs.eg.db,
+  keys = unlist(entrez_ids),  # Use the ENTREZ gene IDs as keys
+  column = "GENENAME",  # Retrieve gene titles
+  keytype = "ENTREZID",
+  multiVals = "list"  # Get all associated gene titles as a list
+)
+
+# Use biomaRt to map probe IDs to Ensembl gene IDs, symbols, and titles
+ensembl_mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+gene_info_ensembl <- getBM(
+  attributes = c("affy_hg_u133_plus_2", "hgnc_symbol", "description"),  # Added "description" for gene title
+  filters = "affy_hg_u133_plus_2",
+  values = data_filtered$ID,
+  mart = ensembl_mart
+)
+```
+# Data updating process
+```{r}
+# Create new columns for updated gene symbols and titles
+data_filtered$Updated.gene.symbol <- NA
+data_filtered$Updated.gene.title <- NA  
+
+# Loop through each probe ID and assign gene symbols and titles
+for (i in 1:nrow(data_filtered)) {
+  probe_id <- data_filtered$ID[i]
+  original_gene_symbol <- data_filtered$Gene.symbol[i]  # Retain original gene symbol
+  original_gene_title <- data_filtered$Gene.title[i]  # Retain original gene title
+  
+  # Initialize matched variables
+  matched_gene_symbol <- original_gene_symbol
+  matched_gene_title <- original_gene_title
+  
+  # Check if the probe ID has a corresponding gene symbol and title
+  if (!is.null(gene_symbols_hgu133[[probe_id]]) && length(gene_symbols_hgu133[[probe_id]]) > 0) {
+    matched_gene_symbol <- paste(gene_symbols_hgu133[[probe_id]], collapse = "///")
+    matched_gene_title <- paste(gene_titles_hgu133[[probe_id]], collapse = "///")  # Get the title
+  } else if (!is.null(gene_symbols_orgHs_eg[[probe_id]]) && length(gene_symbols_orgHs_eg[[probe_id]]) > 0) {
+    matched_gene_symbol <- paste(gene_symbols_orgHs_eg[[probe_id]], collapse = "///")
+    matched_gene_title <- paste(gene_titles_orgHs_eg[[probe_id]], collapse = "///")  # Get the title
+  } else if (nrow(gene_info_ensembl[gene_info_ensembl$affy_hg_u133_plus_2 == probe_id, ]) > 0) {
+    matched_gene_symbol <- gene_info_ensembl$hgnc_symbol[gene_info_ensembl$affy_hg_u133_plus_2 == probe_id]
+    matched_gene_title <- gene_info_ensembl$description[gene_info_ensembl$affy_hg_u133_plus_2 == probe_id]  # Get the title
+  }
+  
+# Trim whitespace from the matched gene symbol
+ matched_gene_symbol <- trimws(matched_gene_symbol)
+
+# Assign the matched gene symbol and title
+  if (matched_gene_symbol == "NA") {
+    data_filtered$Updated.gene.symbol[i] <- original_gene_symbol  # Retain original symbol if no symbol found
+    data_filtered$Updated.gene.title[i] <- original_gene_title  # Retain original title
+  } else {
+    data_filtered$Updated.gene.symbol[i] <- matched_gene_symbol
+    data_filtered$Updated.gene.title[i] <- matched_gene_title  # Assign the title
+  }
+}
+```
+# Debugging process
+```{r}
+# Check for any remaining NAs and print them for debugging
+na_indices_symbol <- which(is.na(data_filtered$Updated.gene.symbol))
+na_indices_title <- which(is.na(data_filtered$Updated.gene.title))
+
+if (length(na_indices_symbol) > 0) {
+  cat("Warning: The following rows have NA in Updated.gene.symbol:\n")
+  print(data_filtered[na_indices_symbol, ])
+}
+
+if (length(na_indices_title) > 0) {
+  cat("Warning: The following rows have NA in Updated.gene.title:\n")
+  print(data_filtered[na_indices_title, ])
+}
+
+# Write the updated data frame to a new TSV file with error handling
+tryCatch({
+  write.table(data_filtered, output_file, sep = '\t', row.names = FALSE, quote = FALSE, col.names = TRUE)
+  cat("Gene symbols and titles updated and saved to", output_file, "\n")
+}, error = function(e) {
+  cat("Error writing the output file:", e$message, "\n")
+})
+```
