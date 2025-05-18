@@ -1,0 +1,108 @@
+---
+title: "Heatmap"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2025-01-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Load required libraries
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(pheatmap)
+```
+# Load data 
+```{r}
+# Load GCT file, skipping headers and removing Description column
+gct_file <- "/Users/amethyst/FYP/Data/Lung Cancer/_33532.gct"
+expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
+expression_data <- expression_data[, -1]  # Remove Description column
+
+# Clean sample names by removing everything after last '_' or '.'
+colnames(expression_data) <- gsub("[_.].*$", "", colnames(expression_data))
+```
+# Define target gense
+```{r}
+# Define your genes of interest (gene names)
+target_genes <- c("ACP1",	"APOA1",	"APOA2",	"CRP",	"LDHC",	"PLTP",	"SAA1", "SAA2",	"SAA2-SAA4",	"SAA4",	"TTR")
+
+# Subset expression data for only those genes present in the data
+genes_found <- intersect(target_genes, rownames(expression_data))
+if(length(genes_found) == 0){
+  stop("None of the target genes were found in the expression data.")
+}
+subset_expression <- expression_data[genes_found, , drop = FALSE]
+
+# Optional: warn if some genes are missing
+missing_genes <- setdiff(target_genes, genes_found)
+if(length(missing_genes) > 0){
+  warning("These genes were not found and will be excluded: ", paste(missing_genes, collapse = ", "))
+}
+```
+# Sample grouping
+```{r}
+# Load grouping information (make sure 'Sample' column matches cleaned sample names)
+grouping_file <- "/Users/amethyst/FYP/Data/Lung Cancer/GSE33532/GSE33532_SampleGrouping.tsv"
+grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+# Reshape subset expression data to long format for ggplot or further analysis
+long_data <- subset_expression %>%
+  as.data.frame() %>%
+  mutate(Gene = rownames(.)) %>%
+  pivot_longer(cols = -Gene, names_to = "Sample", values_to = "Expression")
+
+# Join with grouping data by Sample name
+long_data <- left_join(long_data, grouping_data, by = "Sample")
+
+# Now 'long_data' contains Expression values for your selected genes, sample groups, and is ready for plotting or analysis
+# Assuming 'subset_expression' is your gene x sample matrix after gene selection
+# and 'grouping_data' contains sample grouping info with columns: Sample, Group
+```
+# Sample matching
+```{r}
+# Ensure samples in subset_expression and grouping_data match and are in the same order
+common_samples <- intersect(colnames(subset_expression), grouping_data$Sample)
+subset_expression <- subset_expression[, common_samples, drop = FALSE]
+grouping_data <- grouping_data[match(common_samples, grouping_data$Sample), ]
+```
+# Heatmap mapping
+```{r}
+# Create group_labels data frame with rownames as sample names
+group_labels <- data.frame(Group = factor(grouping_data$Group))
+rownames(group_labels) <- grouping_data$Sample
+
+# Define a custom color palette for heatmap
+my_palette <- colorRampPalette(c("blue", "white", "red"))(50)  # Blue to white to red
+
+# Create breaks for color mapping (adjust if your data range differs)
+breaks <- seq(-3, 3, length.out = 51)
+
+# Define colors for groups (update group names/colors as per your data)
+unique_groups <- unique(group_labels$Group)
+group_colors <- c("Normal" = "limegreen", "Malignant" = "orange")  # Example colors
+# If your groups differ, create a named vector like below:
+# group_colors <- setNames(c("color1", "color2", ...), unique_groups)
+
+annotation_colors <- list(Group = group_colors)
+
+# Plot the heatmap
+pheatmap(subset_expression,
+         color = my_palette,
+         breaks = breaks,
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         scale = "row",
+         show_rownames = TRUE,
+         show_colnames = TRUE,
+         fontsize_row = 8,
+         fontsize_col = 8,
+         main = "GSE33532 Clustered Heatmap",
+         annotation_col = group_labels,
+         annotation_colors = annotation_colors
+)
+```

@@ -1,0 +1,37 @@
+---
+title: "CEL_Processing"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2024-11-05"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+# Load the affy library
+library(affy)
+
+# Specify the path to the folder containing your CEL files
+cel_folder <- "~/FYP/Data/Lung Cancer/GSE18842/GSE18842_CEL"
+
+# Retrieve all CEL files from the specified folder
+cel_files <- list.files(cel_folder, pattern = "\\.CEL$", full.names = TRUE)
+
+# Check if any CEL files were found
+if (length(cel_files) == 0) {
+  stop("No CEL files found in the specified folder.")
+}
+
+# Read the CEL files
+data <- ReadAffy(celfile.path = cel_folder)
+
+# Normalize the data using RMA
+normalized_data <- rma(data)
+
+# Write normalized expression data to a file
+write.exprs(normalized_data, file="~/FYP/Data/Lung Cancer/GSE18842/GSE18842_normal_expression.tsv")
+
+# Print completion message
+cat("Normalized data saved successfully.")
+
+```

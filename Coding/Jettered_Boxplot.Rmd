@@ -1,0 +1,57 @@
+---
+title: "Jettered_Boxplot"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2025-01-26"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Load required libraries
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+# Data adjustment and loading
+```{r}
+# Load your expression dataset from a GCT file
+gct_file <- "/Users/amethyst/FYP/Data/Lung Cancer/GSE19188_ssGSEA.gct"
+
+# Read the GCT file, skipping the first two lines (header info)
+expression_data <- read.table(gct_file, header = TRUE, skip = 2, row.names = 1)
+
+# Remove the "Description" column if it exists
+# Assuming "Description" is the second column in the data frame
+expression_data <- expression_data[, -1]  # Remove the first column
+
+# Remove everything after the last occurrence of '_' or '.'
+colnames(expression_data) <- gsub("[_.].*$", "", colnames(expression_data))
+
+# Load your grouping information from a CSV file
+grouping_file <- "/Users/amethyst/FYP/Data/Lung Cancer/GSE19188/GSE19188_SampleGrouping.tsv"  # Adjust path as necessary
+grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t")
+
+# Reshape the expression data to long format for ggplot
+long_data <- expression_data %>%
+  pivot_longer(cols = everything(), names_to = "Sample", values_to = "Expression")
+
+# Join with grouping information based on Sample name
+long_data <- left_join(long_data, grouping_data, by = "Sample")
+```
+# Create the box plot
+```{r}
+ggplot(long_data, aes(x = Group, y = Expression, fill = Group)) +
+  geom_boxplot(outlier.shape = NA) +                   # Box plot without outliers
+  geom_jitter(width = 0.2, alpha = 0.5) +              # Add jitter for better visibility of points
+  scale_fill_manual(values = c("Normal" = "#BEBEBE",   # Color for Normal
+                               "Malignant" = "#F5B7B1")) + # Color for Malignant
+  labs(title = "ssGSEA GSE19188",
+       x = "Group",
+       y = "Expression") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),          # Center title
+    legend.position = "none"                         # Remove legend if not needed
+  )
+```
