@@ -12,93 +12,71 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(readr)
+library(tidyverse)
 ```
 # Load your dataset from a file
 ```{r}
-data <- read_delim("/Users/amethyst/FYP/bubble.tsv")
-```
-# Calculate -log10(Pvalue)
-```{r}
-data <- data %>%
-  mutate(logPvalue = -log10(Pvalue))  # Create a new column for -log10(Pvalue)
-```
-# Automatically set limits for color scale
-```{r}
-color_limits <- range(data$logPvalue, na.rm = TRUE)  # Get range of logPvalue
-color_limits <- c(floor(color_limits[1] - 0.5), ceiling(color_limits[2] + 0.5))  # Extend limits
+# Load your dataset and immediately convert to a standard data frame
+data <- as.data.frame(read_delim("~/GeneExpressionAnalysis/Data/Lung Cancer/KEGG.txt"))
 
-# Create the bubble plot
-ggplot(data, aes(x = Enrichment, y = Term)) +
-  geom_point(aes(size = GeneCount, color = logPvalue)) + # Map size and color
-  scale_size_continuous(name = "Gene Count", range = c(3, 15)) + # Bubble size legend
-  scale_color_gradient(name = "-log10(P-value)", low = "blue", high = "red", limits = color_limits) + # Color gradient legend
-  
-  labs(
-    title = "Top 10 Biological Process",
-    x = "Rich Factor",
-    y = "Biological Process of Down-Regulated Gene"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 10),
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    plot.title = element_text(hjust = 0.5)
-  ) +
-  guides( # Set legend order
-    size = guide_legend(order = 2),  
-    color = guide_colorbar(order = 1)
-  )
+# Check column names to ensure proper referencing
+print(colnames(data))
+
+# Check and fix data structure if needed
+if(any(sapply(data, is.list))) {
+  # Convert any list columns to character
+  data <- data %>% mutate(across(where(is.list), as.character))
+}
 ```
-# second code
+# Calculate -log10(PValue) and log10(Fold Enrichment)
 ```{r}
-# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(readr)  # Make sure to load readr for read_delim
-
-# Load your dataset from a file
-data <- read_delim("/Users/amethyst/Desktop/BP.tsv")
-
-# Calculate -log10(Pvalue) and log10(Fold Enrichment)
+# Use backticks for column names with spaces
 data <- data %>%
   mutate(
-    logPvalue = -log10(PValue),  # Create a new column for -log10(Pvalue)
-    logFoldEnrichment = log10(FoldEnrichment)  # Create a new column for log10(Fold Enrichment)
-  ) %>%
-  # Limit to the first 10 rows
-  slice(1:10) %>%
+    logPValue = -log10(PValue),
+    logFoldEnrichment = log10(`Fold Enrichment`)
+  )
+```
+# Additional touch
+```{r}
+# Take first 10 rows using base R subsetting
+data <- data[1:10, ]
 
-  # Limit to the top 10 rows based on PValue (or change to logPvalue or any other metric if needed)
-  # slice_max(order_by = PValue, n = 10)
+# Remove both "GO:xxxxxxx~" and "hsaXXXXX:" prefixes
+data$Term <- sub("^GO:\\d+~", "", data$Term)         # Remove GO terms
+data$Term <- sub("^hsa\\d+:?", "", data$Term)        # Remove hsaXXXXX: prefixes
 
-  # Wrap long labels in the Term column
-  mutate(Term = str_wrap(Term, width = 30))  # Adjust width as needed
+# Wrap long labels in the Term column
+data$Term <- str_wrap(data$Term, width = 25)
 
-# Automatically set limits for color scale
-color_limits <- range(data$logPvalue, na.rm = TRUE)  # Get range of logPvalue
-color_limits <- c(floor(color_limits[1] - 0.5), ceiling(color_limits[2] + 0.5))  # Extend limits
+ # Remove NA terms before plotting
+data <- data[!is.na(data$Term), ]
 
+# Automatically set limits for color scale using the CORRECT variable name
+color_limits <- range(data$logPValue, na.rm = TRUE)
+color_limits <- c(floor(color_limits[1] - 0.5), ceiling(color_limits[2] + 0.5))
+```
 # Create the bubble plot
-ggplot(data, aes(x = logFoldEnrichment, y = Term)) +  # Use logFoldEnrichment for x-axis
-  geom_point(aes(size = Count, color = logPvalue)) + # Map size and color
-  scale_size_continuous(name = "GeneCount", range = c(3, 15)) + # Bubble size legend
-  scale_color_gradient(name = "-log10(P-value)", low = "blue", high = "red", limits = color_limits) + # Color gradient legend
-  
+```{r}
+ggplot(data, aes(x = logFoldEnrichment, y = Term)) +
+  geom_point(aes(size = Count, color = logPValue)) +
+  scale_size_continuous(name = "GeneCount", range = c(3, 15)) +
+  scale_color_gradient(name = "-log10(P-value)", low = "blue", high = "red", limits = color_limits) +
   labs(
-    title = "Top 10 Biological Process",
-    x = "Rich Factor",  # Update x-axis label
-    y = "Biological Process of Down-Regulated Gene"
+    title = "Top Pathway",
+    x = "Rich Factor",
+    y = "Pathway of SAA2 Family Geneset"
   ) +
   theme_minimal() +
   theme(
-    axis.text.y = element_text(size = 10),
+    axis.text.y = element_text(size = 9),
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12),
     plot.title = element_text(hjust = 0.5)
   ) +
-  guides( # Set legend order
-    size = guide_legend(order = 2),  
+  guides(
+    size = guide_legend(order = 2),
     color = guide_colorbar(order = 1)
   )
 ```

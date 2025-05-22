@@ -18,7 +18,7 @@ library(pheatmap)
 # Load data 
 ```{r}
 # Load GCT file, skipping headers and removing Description column
-gct_file <- "/Users/amethyst/FYP/Data/Lung Cancer/_33532.gct"
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_collapsed_to_symbols.gct"
 expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
 expression_data <- expression_data[, -1]  # Remove Description column
 
@@ -46,7 +46,7 @@ if(length(missing_genes) > 0){
 # Sample grouping
 ```{r}
 # Load grouping information (make sure 'Sample' column matches cleaned sample names)
-grouping_file <- "/Users/amethyst/FYP/Data/Lung Cancer/GSE33532/GSE33532_SampleGrouping.tsv"
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv"
 grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Reshape subset expression data to long format for ggplot or further analysis
@@ -72,7 +72,7 @@ grouping_data <- grouping_data[match(common_samples, grouping_data$Sample), ]
 # Heatmap mapping
 ```{r}
 # Create group_labels data frame with rownames as sample names
-group_labels <- data.frame(Group = factor(grouping_data$Group))
+group_labels <- data.frame(Group = factor(grouping_data$Condition))
 rownames(group_labels) <- grouping_data$Sample
 
 # Define a custom color palette for heatmap
@@ -89,8 +89,19 @@ group_colors <- c("Normal" = "limegreen", "Malignant" = "orange")  # Example col
 
 annotation_colors <- list(Group = group_colors)
 
+# Define the desired sample order: all Normal, then all Pre-Malignant
+normal_samples <- grouping_data$Sample[grouping_data$Condition == "Normal"]
+Malignant_samples <- grouping_data$Sample[grouping_data$Condition == "Malignant"]
+ordered_samples <- c(normal_samples, Malignant_samples)
+
+# Reorder columns in your expression matrix
+subset_expression_ordered <- subset_expression[, ordered_samples, drop = FALSE]
+
+# Reorder group_labels to match the new sample order
+group_labels_ordered <- group_labels[ordered_samples, , drop = FALSE]
+
 # Plot the heatmap
-pheatmap(subset_expression,
+pheatmap(subset_expression_ordered,
          color = my_palette,
          breaks = breaks,
          clustering_distance_rows = "euclidean",
@@ -101,8 +112,9 @@ pheatmap(subset_expression,
          show_colnames = TRUE,
          fontsize_row = 8,
          fontsize_col = 8,
-         main = "GSE33532 Clustered Heatmap",
-         annotation_col = group_labels,
-         annotation_colors = annotation_colors
+         main = "GSE79210 Clustered Heatmap",
+         annotation_col = group_labels_ordered,
+         annotation_colors = annotation_colors,
+         cluster_cols = FALSE  # This disables column clustering and preserves your order
 )
 ```

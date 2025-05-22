@@ -1,0 +1,70 @@
+---
+title: "Normalisation_DESeq2"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2025-05-19"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+# Load required libraries
+library(tidyverse)
+library(DESeq2)
+library(S4Vectors)
+library(tibble)
+
+# Load raw counts matrix (genes as rows, samples as columns)
+counts <- read.delim("~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_raw_count.tsv", row.names = 1, check.names = FALSE)
+
+# Load sample metadata (sample info with rownames matching counts columns)
+coldata <- read.delim("~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv", row.names = 1, check.names = FALSE)
+
+# Load human gene annotation table with GeneID and length columns
+# Assuming columns: GeneID, Symbol, ChrStart, ChrStop, length
+annotation <- read.delim("~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/Human_annotation.tsv", stringsAsFactors = FALSE)
+
+# Match gene lengths to counts matrix rows by GeneID
+# Ensure gene IDs in counts rownames and annotation$GeneID are comparable
+# For safety, convert both to character
+counts_genes <- rownames(counts)
+annotation$GeneID <- as.character(annotation$GeneID)
+
+# Match gene lengths in the same order as counts genes
+matched_idx <- match(counts_genes, annotation$GeneID)
+
+# Extract gene lengths (in base pairs)
+gene_lengths <- annotation$Length[matched_idx]
+
+# Check for any NA values (genes without length info)
+if(any(is.na(gene_lengths))) {
+  warning("Some genes in counts matrix do not have matching lengths in annotation!")
+  # Optionally remove genes without length info
+  keep <- !is.na(gene_lengths)
+  counts <- counts[keep, ]
+  gene_lengths <- gene_lengths[keep]
+}
+
+# Create DESeqDataSet object
+dds <- DESeqDataSetFromMatrix(countData = counts,
+                              colData = coldata,
+                              design = ~ 1)  # Use your actual design formula here
+
+# Assign gene lengths to rowData
+rowData(dds)$basepairs <- gene_lengths
+
+# Run DESeq normalization and estimation
+dds <- DESeq(dds)
+
+# Calculate RPKM values
+rpkm_values <- fpkm(dds, robust = FALSE)
+
+rpkm_df <- as.data.frame(rpkm_values)
+rpkm_df <- rownames_to_column(rpkm_df, var = "GeneID")
+
+head(rpkm_df)
+
+# Save to TSV
+write.table(rpkm_df, "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_rpkm.tsv", 
+            quote = FALSE, sep = '\t', row.names = FALSE)
+```
