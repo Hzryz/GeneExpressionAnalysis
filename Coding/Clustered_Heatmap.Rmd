@@ -18,7 +18,7 @@ library(pheatmap)
 # Load data 
 ```{r}
 # Load GCT file, skipping headers and removing Description column
-gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_collapsed_to_symbols.gct"
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_collapsed_to_symbols.gct"
 expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
 expression_data <- expression_data[, -1]  # Remove Description column
 
@@ -46,7 +46,7 @@ if(length(missing_genes) > 0){
 # Sample grouping
 ```{r}
 # Load grouping information (make sure 'Sample' column matches cleaned sample names)
-grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv"
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_samplegroup.tsv"
 grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Reshape subset expression data to long format for ggplot or further analysis
@@ -74,30 +74,26 @@ grouping_data <- grouping_data[match(common_samples, grouping_data$Sample), ]
 # Create group_labels data frame with rownames as sample names
 group_labels <- data.frame(Group = factor(grouping_data$Condition))
 rownames(group_labels) <- grouping_data$Sample
+# Define all six groups in the desired order
+all_groups <- c("Normal", "Metaplasia", "Dysplasia")
 
-# Define a custom color palette for heatmap
-my_palette <- colorRampPalette(c("blue", "white", "red"))(50)  # Blue to white to red
+# Convert Group column to factor with specified levels
+group_labels$Group <- factor(group_labels$Group, levels = all_groups)
 
-# Create breaks for color mapping (adjust if your data range differs)
-breaks <- seq(-3, 3, length.out = 51)
+# Create a gradient color palette from limegreen to orange with 6 colors
+group_colors_vec <- colorRampPalette(c("lightgreen", "orange"))(length(all_groups))
 
-# Define colors for groups (update group names/colors as per your data)
-unique_groups <- unique(group_labels$Group)
-group_colors <- c("Normal" = "limegreen", "Malignant" = "orange")  # Example colors
-# If your groups differ, create a named vector like below:
-# group_colors <- setNames(c("color1", "color2", ...), unique_groups)
+# Map colors to group names
+group_colors <- setNames(group_colors_vec, all_groups)
 
+# Annotation colors list for pheatmap
 annotation_colors <- list(Group = group_colors)
 
-# Define the desired sample order: all Normal, then all Pre-Malignant
-normal_samples <- grouping_data$Sample[grouping_data$Condition == "Normal"]
-Malignant_samples <- grouping_data$Sample[grouping_data$Condition == "Malignant"]
-ordered_samples <- c(normal_samples, Malignant_samples)
+# Order samples by the 6 groups
+ordered_samples <- grouping_data$Sample[order(factor(grouping_data$Condition, levels = all_groups))]
 
-# Reorder columns in your expression matrix
+# Reorder expression matrix and group labels accordingly
 subset_expression_ordered <- subset_expression[, ordered_samples, drop = FALSE]
-
-# Reorder group_labels to match the new sample order
 group_labels_ordered <- group_labels[ordered_samples, , drop = FALSE]
 
 # Plot the heatmap
@@ -112,9 +108,9 @@ pheatmap(subset_expression_ordered,
          show_colnames = TRUE,
          fontsize_row = 8,
          fontsize_col = 8,
-         main = "GSE79210 Clustered Heatmap",
+         main = "GSE79209 Clustered Heatmap",
          annotation_col = group_labels_ordered,
          annotation_colors = annotation_colors,
-         cluster_cols = FALSE  # This disables column clustering and preserves your order
+         cluster_cols = FALSE # This disables column clustering and preserves your order
 )
 ```

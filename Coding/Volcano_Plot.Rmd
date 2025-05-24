@@ -40,16 +40,16 @@ plot(GSE79209_edited$logFC, GSE79209_edited$lgtranspvalue, main='\n Diffrentiall
 # For down-regulated genes
 # logFC < 0 because any numbers cannot divided by 0
 # 2/-logFC; the "2" here refers to p-value = 0.01
-with(subset(GSE79209_edited, logFC < 0 & lgtranspvalue >= (0.5/-logFC)), points(logFC, lgtranspvalue, col = "red"))
+with(subset(GSE79209_edited, logFC < 0 & lgtranspvalue >= (2/-logFC)), points(logFC, lgtranspvalue, col = "red"))
 
 # For up-regulated genes
-with(subset(GSE79209_edited, logFC > 0 & lgtranspvalue >= (0.5/logFC)), points(logFC, lgtranspvalue, col = "blue"))
+with(subset(GSE79209_edited, logFC > 0 & lgtranspvalue >= (2/logFC)), points(logFC, lgtranspvalue, col = "blue"))
 
 # Draw the line
 xpos <- seq(0, 6, 0.01)
 xneg <- seq(-6, 0, 0.01)
-points(xpos, 0.5/xpos, type="l")
-points(xneg, -0.5/xneg, type="l")
+points(xpos, 2/xpos, type="l")
+points(xneg, -2/xneg, type="l")
 ```
 # Down-regulated genes
 ```{r}

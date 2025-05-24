@@ -16,7 +16,7 @@ library(tidyr)
 # Data adjustment and loading
 ```{r}
 # Load your expression dataset from a GCT file
-gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/79210_ssGSEA.gct"
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/79209_ssGSEA.gct"
 
 # Read the GCT file, skipping the first two lines (header info)
 expression_data <- read.table(gct_file, header = TRUE, skip = 2, row.names = 1)
@@ -29,7 +29,7 @@ expression_data <- expression_data[, -1]  # Remove the first column
 colnames(expression_data) <- gsub("[_.].*$", "", colnames(expression_data))
 
 # Load your grouping information from a CSV file
-grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv"  # Adjust path as necessary
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_samplegroup.tsv"  # Adjust path as necessary
 grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t")
 
 # Reshape the expression data to long format for ggplot
@@ -38,20 +38,31 @@ long_data <- expression_data %>%
 
 # Join with grouping information based on Sample name
 long_data <- left_join(long_data, grouping_data, by = "Sample")
+
+# Set Condition as an ordered factor
+long_data$Condition <- factor(long_data$Condition,
+                              levels = c("Normal", "Metaplasia", "Dysplasia"),
+                              ordered = TRUE)
 ```
 # Create the box plot
 ```{r}
+# Define start and end colors
+start_color <- "#BEBEBE"
+end_color <- "#FB9A99"  
+
+# Generate (n) colors for (n) categories
+color_palette <- colorRampPalette(c(start_color, end_color))(3)
+
 ggplot(long_data, aes(x = Condition, y = Expression, fill = Condition)) +
-  geom_boxplot(outlier.shape = NA) +                   # Box plot without outliers
-  geom_jitter(width = 0.2, alpha = 0.5) +              # Add jitter for better visibility of points
-  scale_fill_manual(values = c("Normal" = "#BEBEBE",   # Color for Normal
-                               "Malignant" = "#F5B7B1")) + # Color for Pre-Malignant
-  labs(title = "ssGSEA GSE79210",
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  scale_fill_manual(values = setNames(color_palette, levels(long_data$Condition))) +
+  labs(title = "ssGSEA GSE79209",
        x = "Group",
        y = "Expression") +
   theme_minimal() +
   theme(
-    plot.title = element_text(hjust = 0.5),          # Center title
-    legend.position = "none"                         # Remove legend if not needed
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
   )
 ```
