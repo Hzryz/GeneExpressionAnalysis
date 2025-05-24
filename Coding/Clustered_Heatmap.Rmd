@@ -75,12 +75,12 @@ grouping_data <- grouping_data[match(common_samples, grouping_data$Sample), ]
 group_labels <- data.frame(Group = factor(grouping_data$Condition))
 rownames(group_labels) <- grouping_data$Sample
 # Define all six groups in the desired order
-all_groups <- c("Normal", "Metaplasia", "Dysplasia")
+all_groups <- c("Normal","Hyperplasia", "Metaplasia", "Mild Dysplasia", "Moderate Dysplasia", "Severe Dysplasia")
 
 # Convert Group column to factor with specified levels
 group_labels$Group <- factor(group_labels$Group, levels = all_groups)
 
-# Create a gradient color palette from limegreen to orange with 6 colors
+# Create a gradient color palette from limegreen to orange
 group_colors_vec <- colorRampPalette(c("lightgreen", "orange"))(length(all_groups))
 
 # Map colors to group names
@@ -89,7 +89,7 @@ group_colors <- setNames(group_colors_vec, all_groups)
 # Annotation colors list for pheatmap
 annotation_colors <- list(Group = group_colors)
 
-# Order samples by the 6 groups
+# Order samples by the groups
 ordered_samples <- grouping_data$Sample[order(factor(grouping_data$Condition, levels = all_groups))]
 
 # Reorder expression matrix and group labels accordingly
