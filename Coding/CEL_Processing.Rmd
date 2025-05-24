@@ -29,16 +29,8 @@ data <- ReadAffy(celfile.path = cel_folder)
 normalized_data <- rma(data)
 
 # Write normalized expression data to a file
-<<<<<<< HEAD
-write.exprs(normalized_data, file="~/FYP/Data/Lung Cancer/GSE18842/GSE18842_normal_expression.tsv")
-
-# Print completion message
-cat("Normalized data saved successfully.")
-
-=======
 write.exprs(normalized_data, file="~/GeneExpressionAnalysis/Data/Lung Cancer/Malignant/GSE33532/GSE33532_normalize.tsv")
 
 # Print completion message
 cat("Normalized data saved successfully.")
->>>>>>> 974b270 (reupload all necessary data)
 ```
