@@ -1,0 +1,191 @@
+---
+title: "Strip_Chart"
+author: "Muhammad Zam Hazri Bin Zamri"
+date: "2025-05-26"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Load required libraries
+```{r}
+# Load libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+# Data handling
+```{r}
+# Load expression data
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_collapsed_to_symbols.gct"
+expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
+expression_data <- expression_data[, -1]  # Remove Description column
+
+# Clean sample names
+colnames(expression_data) <- gsub("[_.].*$", "", colnames(expression_data))
+
+# Specify the gene of interest
+target_gene <- "SAA2"  # Change to your gene of interest
+
+# Check if the gene exists
+if (!(target_gene %in% rownames(expression_data))) {
+  stop(paste("Gene", target_gene, "not found in expression data!"))
+}
+
+# Extract expression for the target gene
+gene_expression <- expression_data[target_gene, , drop = FALSE] %>%
+  as.data.frame() %>%
+  mutate(Gene = rownames(.)) %>%
+  pivot_longer(cols = -Gene, names_to = "Sample", values_to = "Expression")
+
+# Load grouping info
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_samplegroup.tsv"
+grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+# Merge expression and grouping
+plot_data <- left_join(gene_expression, grouping_data, by = "Sample")
+```
+# Plot for Sex-group
+```{r}
+# Set group order
+plot_data$Sex <- factor(plot_data$Sex,
+                              levels = c("Male", "Female"),
+                              ordered = TRUE)
+
+# Define colors: blue for Male, red for Female
+sex_colors <- c("Male" = "#9ECAE1", "Female" = "#FB9A99")
+
+# Plot: Sex group vs expression
+ggplot(plot_data, aes(x = Sex, y = Expression, color = Sex)) +
+  geom_jitter(width = 0.15, size = 2.5, alpha = 0.85, show.legend = FALSE) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
+  scale_color_manual(values = sex_colors) +
+  labs(title = paste("GSE79209: Sex vs.", target_gene, "expression"),
+       x = NULL,
+       y = paste(target_gene, "expression (normalized)")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
+    panel.grid.major.x = element_blank()
+  )
+```
+# Plot for Age-group
+```{r}
+# Define age breaks and labels
+age_breaks <- c(20, 30, 40, 50, 60, 70, 80, 90)
+age_labels <- c("20y-29y", "30y-39y", "40y-49y", "50y-59y", "60y-69y", "70y-79y", "80y-89y")
+
+# Make sure Age column is numeric
+plot_data$Age <- as.numeric(plot_data$Age)
+
+# Bin ages
+plot_data$AgeGroup <- cut(plot_data$Age, breaks = age_breaks, labels = age_labels, right = FALSE, include.lowest = TRUE)
+
+# Remove samples with NA AgeGroup (outside specified bins)
+plot_data <- plot_data[!is.na(plot_data$AgeGroup), ]
+
+# Set group order
+plot_data$AgeGroup <- factor(plot_data$AgeGroup, levels = age_labels, ordered = TRUE)
+
+# Define colors for age groups
+age_colors <- c(
+  "20y-29y" = "#6BAED6",   # blue
+  "30y-39y" = "#9ECAE1",   # light blue
+  "40y-49y" = "#31A354",   # green
+  "50y-59y" = "#FEC44F",   # yellow
+  "60y-69y" = "#FD8D3C",   # orange
+  "70y-79y" = "#E6550D",   # red
+  "80y-89y" = "#756BB1"    # purple
+)
+
+# Plot: Age group vs expression
+ggplot(plot_data, aes(x = AgeGroup, y = Expression, color = AgeGroup)) +
+  geom_jitter(width = 0.18, size = 2.5, alpha = 0.85, show.legend = FALSE) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
+  scale_color_manual(values = age_colors) +
+  labs(title = paste("GSE79209: Age vs.", target_gene, "expression"),
+       x = NULL,
+       y = paste(target_gene, "expression (normalized)")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
+    panel.grid.major.x = element_blank()
+  )
+```
+# Plot for Smoking-status
+```{r}
+# Set group order
+plot_data$Smoking.status <- factor(plot_data$Smoking.status,
+                              levels = c("Current smoker", "Former smoker"),
+                              ordered = TRUE)
+
+# Define colors: blue for Male, red for Female
+sex_colors <- c("Current smoker" = "#FB9A99", "Former smoker" = "#9ECAE1")
+
+ggplot(plot_data, aes(x = Smoking.status, y = Expression, color = Smoking.status)) +
+  geom_jitter(width = 0.15, size = 2.5, alpha = 0.85, show.legend = FALSE) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
+  scale_color_manual(values = sex_colors) +
+  labs(title = paste("GSE79209: Smoking vs.", target_gene, "expression"),
+       x = NULL,
+       y = paste(target_gene, "expression (normalized)")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
+    panel.grid.major.x = element_blank()
+  )
+```
+# Plot for Pack-years
+```{r}
+# Define pack breaks and labels
+pack_breaks <- c(0, 20, 40, 60, 80, 1000)
+pack_labels <- c("0-19", "20-39", "40-59", "60-79", "80+")
+
+# Make sure Pack years column is numeric
+plot_data$Pack.years <- as.numeric(plot_data$Pack.years)
+
+# Bin pack
+plot_data$Pack <- cut(plot_data$Pack.years, breaks = pack_breaks, labels = pack_labels, right = FALSE, include.lowest = TRUE)
+
+# Remove samples with NA AgeGroup (outside specified bins)
+plot_data <- plot_data[!is.na(plot_data$Pack), ]
+
+# Set group order
+plot_data$Pack <- factor(plot_data$Pack, levels = pack_labels, ordered = TRUE)
+
+# Define colors for packs
+pack_colors <- c(
+  "0-19" = "#6BAED6",   # blue
+  "20-39" = "#9ECAE1",   # light blue
+  "40-59" = "#31A354",   # green
+  "60-79" = "#FEC44F",   # yellow
+  "80+" = "#FD8D3C",   # orange
+  "If needed" = "#E6550D",   # red
+  "If needed" = "#756BB1"    # purple
+)
+
+# Plot: Pack-Years vs expression
+ggplot(plot_data, aes(x = Pack, y = Expression, color = Pack)) +
+  geom_jitter(width = 0.18, size = 2.5, alpha = 0.85, show.legend = FALSE) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
+  scale_color_manual(values = pack_colors) +
+  labs(title = paste("GSE79209: Pack-Years vs.", target_gene, "expression"),
+       x = "Pack-Years",
+       y = paste(target_gene, "expression (normalized)")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
+    panel.grid.major.x = element_blank()
+  )
+```
