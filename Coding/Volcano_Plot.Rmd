@@ -14,36 +14,36 @@ library(tidyverse)
 # Load data
 ```{r}
 # Load data
-GSE79209_ori <- read_delim("/Users/amethyst/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_filtered.tsv")
+GSE79210_ori <- read_delim("/Users/amethyst/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_filtered.tsv")
 
 #Extract pvalue, gene symbol and logfc
-GSE79209_edited <- GSE79209_ori[,c(9,6,3)]
+GSE79210_edited <- GSE79210_ori[,c(9,6,3)]
 
-write.table(GSE79209_edited, "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_edited.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+write.table(GSE79210_edited, "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_edited.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
 
 # Display top few rows
-head(GSE79209_edited)
+head(GSE79210_edited)
 ```
 # Volcano analysis
 ```{r}
 # Transform p value to -log10
-GSE79209_edited$lgtranspvalue <- -log10(GSE79209_edited$P.Value)
-head(GSE79209_edited)
+GSE79210_edited$lgtranspvalue <- -log10(GSE79210_edited$P.Value)
+head(GSE79210_edited)
 
 # Set the volcano plot parameter
 par(pch = 16) # solid dot
 par(pty = "s") # square plot
 
 # Plotting the figures
-plot(GSE79209_edited$logFC, GSE79209_edited$lgtranspvalue, main='\n Diffrentially expressed Gene Analysis: GSE79209\n Tumor (n = 80) vs Control (n = 20)\n -log10(p-value) > 2 & |log2FC| > 1\n', xlab=expression('lg'[2]*'FC'), ylab=expression('-lg'[10]*'pvalue'),cex.lab=1.2)
+plot(GSE79210_edited$logFC, GSE79210_edited$lgtranspvalue, main='\n Diffrentially expressed Gene Analysis: GSE79210\n Tumor (n = 80) vs Control (n = 20)\n -log10(p-value) > 2 & |log2FC| > 1\n', xlab=expression('lg'[2]*'FC'), ylab=expression('-lg'[10]*'pvalue'),cex.lab=1.2)
 
 # For down-regulated genes
 # logFC < 0 because any numbers cannot divided by 0
 # 2/-logFC; the "2" here refers to p-value = 0.01
-with(subset(GSE79209_edited, logFC < 0 & lgtranspvalue >= (2/-logFC)), points(logFC, lgtranspvalue, col = "red"))
+with(subset(GSE79210_edited, logFC < 0 & lgtranspvalue >= (2/-logFC)), points(logFC, lgtranspvalue, col = "red"))
 
 # For up-regulated genes
-with(subset(GSE79209_edited, logFC > 0 & lgtranspvalue >= (2/logFC)), points(logFC, lgtranspvalue, col = "blue"))
+with(subset(GSE79210_edited, logFC > 0 & lgtranspvalue >= (2/logFC)), points(logFC, lgtranspvalue, col = "blue"))
 
 # Draw the line
 xpos <- seq(0, 6, 0.01)
@@ -54,18 +54,18 @@ points(xneg, -2/xneg, type="l")
 # Down-regulated genes
 ```{r}
 # Extract Down-regulated genes
-GSE_DOWN <- subset(GSE79209_edited, logFC < 0 & lgtranspvalue >= (2/-logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
+GSE_DOWN <- subset(GSE79210_edited, logFC < 0 & lgtranspvalue >= (2/-logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
 GSE_DOWN <- GSE_DOWN[order(GSE_DOWN$logFC), ]
 head(GSE_DOWN)
 
-write.table(GSE_DOWN, "~/GeneExpressionAnalysis/Output/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_DN.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+write.table(GSE_DOWN, "~/GeneExpressionAnalysis/Output/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_DN.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
 ```
 # Up-regulated genes
 ```{r}
 # Extract Up-regulated genes
-GSE_UP <- subset(GSE79209_edited, logFC > 0 & lgtranspvalue >= (2/logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
+GSE_UP <- subset(GSE79210_edited, logFC > 0 & lgtranspvalue >= (2/logFC) , select = c(Updated.gene.symbol, logFC, P.Value))
 GSE_UP <- GSE_UP[order(GSE_UP$logFC, decreasing = TRUE), ]
 head(GSE_UP)
 
-write.table(GSE_UP, "~/GeneExpressionAnalysis/Output/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_UP.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
+write.table(GSE_UP, "~/GeneExpressionAnalysis/Output/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_UP.tsv", quote = FALSE, sep = '\t', row.names = FALSE)
 ```

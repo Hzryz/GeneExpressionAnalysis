@@ -18,7 +18,7 @@ library(pheatmap)
 # Load data 
 ```{r}
 # Load GCT file, skipping headers and removing Description column
-gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_collapsed_to_symbols.gct"
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_collapsed_to_symbols.gct"
 expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
 expression_data <- expression_data[, -1]  # Remove Description column
 
@@ -46,7 +46,7 @@ if(length(missing_genes) > 0){
 # Sample grouping
 ```{r}
 # Load grouping information (make sure 'Sample' column matches cleaned sample names)
-grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_samplegroup.tsv"
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv"
 grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Reshape subset expression data to long format for ggplot or further analysis
@@ -108,7 +108,7 @@ pheatmap(subset_expression_ordered,
          show_colnames = TRUE,
          fontsize_row = 8,
          fontsize_col = 8,
-         main = "GSE79209 Clustered Heatmap",
+         main = "GSE79210 Clustered Heatmap",
          annotation_col = group_labels_ordered,
          annotation_colors = annotation_colors,
          cluster_cols = FALSE # This disables column clustering and preserves your order

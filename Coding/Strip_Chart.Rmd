@@ -16,11 +16,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(cowplot)
 ```
 # Data handling
 ```{r}
 # Load expression data
-gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_collapsed_to_symbols.gct"
+gct_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_collapsed_to_symbols.gct"
 expression_data <- read.delim(gct_file, header = TRUE, skip = 2, row.names = 1, check.names = FALSE)
 expression_data <- expression_data[, -1]  # Remove Description column
 
@@ -42,7 +43,7 @@ gene_expression <- expression_data[target_gene, , drop = FALSE] %>%
   pivot_longer(cols = -Gene, names_to = "Sample", values_to = "Expression")
 
 # Load grouping info
-grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79209/GSE79209_samplegroup.tsv"
+grouping_file <- "~/GeneExpressionAnalysis/Data/Lung Cancer/Pre-Malignant/GSE79210/GSE79210_samplegroup.tsv"
 grouping_data <- read.table(grouping_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Merge expression and grouping
@@ -59,12 +60,12 @@ plot_data$Sex <- factor(plot_data$Sex,
 sex_colors <- c("Male" = "#9ECAE1", "Female" = "#FB9A99")
 
 # Plot: Sex group vs expression
-ggplot(plot_data, aes(x = Sex, y = Expression, color = Sex)) +
+plot_sex <- ggplot(plot_data, aes(x = Sex, y = Expression, color = Sex)) +
   geom_jitter(width = 0.15, size = 2.5, alpha = 0.85, show.legend = FALSE) +
   stat_summary(fun = median, fun.min = median, fun.max = median,
                geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
   scale_color_manual(values = sex_colors) +
-  labs(title = paste("GSE79209: Sex vs.", target_gene, "expression"),
+  labs(title = paste("GSE79210: ", target_gene, "expression vs. Sex"),
        x = NULL,
        y = paste(target_gene, "expression (normalized)")) +
   theme_minimal(base_size = 15) +
@@ -73,6 +74,8 @@ ggplot(plot_data, aes(x = Sex, y = Expression, color = Sex)) +
     axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
     panel.grid.major.x = element_blank()
   )
+
+print(plot_sex)
 ```
 # Plot for Age-group
 ```{r}
@@ -104,12 +107,12 @@ age_colors <- c(
 )
 
 # Plot: Age group vs expression
-ggplot(plot_data, aes(x = AgeGroup, y = Expression, color = AgeGroup)) +
+plot_age <- ggplot(plot_data, aes(x = AgeGroup, y = Expression, color = AgeGroup)) +
   geom_jitter(width = 0.18, size = 2.5, alpha = 0.85, show.legend = FALSE) +
   stat_summary(fun = median, fun.min = median, fun.max = median,
                geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
   scale_color_manual(values = age_colors) +
-  labs(title = paste("GSE79209: Age vs.", target_gene, "expression"),
+  labs(title = paste("GSE79210: ", target_gene, "expression vs. Age"),
        x = NULL,
        y = paste(target_gene, "expression (normalized)")) +
   theme_minimal(base_size = 15) +
@@ -118,23 +121,25 @@ ggplot(plot_data, aes(x = AgeGroup, y = Expression, color = AgeGroup)) +
     axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
     panel.grid.major.x = element_blank()
   )
+
+print(plot_age)
 ```
 # Plot for Smoking-status
 ```{r}
 # Set group order
 plot_data$Smoking.status <- factor(plot_data$Smoking.status,
-                              levels = c("Current smoker", "Former smoker"),
+                              levels = c("Current smoker", "Former smoker", "Ever smoker", "Never smoker"),
                               ordered = TRUE)
 
-# Define colors: blue for Male, red for Female
-sex_colors <- c("Current smoker" = "#FB9A99", "Former smoker" = "#9ECAE1")
+# Define colors: blue for non-smoker, red for smoker
+smoking_colors <- c("Current smoker" = "#FB9A99", "Former smoker" = "#9ECAE1", "Ever smoker" = "#FB9A99", "Never smoker" = "#9ECAE1")
 
-ggplot(plot_data, aes(x = Smoking.status, y = Expression, color = Smoking.status)) +
+plot_smoking <- ggplot(plot_data, aes(x = Smoking.status, y = Expression, color = Smoking.status)) +
   geom_jitter(width = 0.15, size = 2.5, alpha = 0.85, show.legend = FALSE) +
   stat_summary(fun = median, fun.min = median, fun.max = median,
                geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
-  scale_color_manual(values = sex_colors) +
-  labs(title = paste("GSE79209: Smoking vs.", target_gene, "expression"),
+  scale_color_manual(values = smoking_colors) +
+  labs(title = paste("GSE79210: ", target_gene, "expression vs. Smoking"),
        x = NULL,
        y = paste(target_gene, "expression (normalized)")) +
   theme_minimal(base_size = 15) +
@@ -143,6 +148,8 @@ ggplot(plot_data, aes(x = Smoking.status, y = Expression, color = Smoking.status
     axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
     panel.grid.major.x = element_blank()
   )
+
+print(plot_smoking)
 ```
 # Plot for Pack-years
 ```{r}
@@ -174,12 +181,13 @@ pack_colors <- c(
 )
 
 # Plot: Pack-Years vs expression
-ggplot(plot_data, aes(x = Pack, y = Expression, color = Pack)) +
+plot_pack <- ggplot(plot_data, aes(x = Pack, y = Expression, color = Pack)) +
   geom_jitter(width = 0.18, size = 2.5, alpha = 0.85, show.legend = FALSE) +
   stat_summary(fun = median, fun.min = median, fun.max = median,
                geom = "crossbar", width = 0.5, color = "#BEBEBE", size = 0.5, alpha = 0.5) +
   scale_color_manual(values = pack_colors) +
-  labs(title = paste("GSE79209: Pack-Years vs.", target_gene, "expression"),
+  labs(title = paste("GSE79210: ", target_gene, "expression vs. Pack-Years
+"),
        x = "Pack-Years",
        y = paste(target_gene, "expression (normalized)")) +
   theme_minimal(base_size = 15) +
@@ -188,4 +196,16 @@ ggplot(plot_data, aes(x = Pack, y = Expression, color = Pack)) +
     axis.text.x = element_text(face = "bold", angle = 30, hjust = 1),
     panel.grid.major.x = element_blank()
   )
+
+print(plot_pack)
+```
+# Combining all plot
+```{r}
+# Combine plots in a 2x2 grid with labels
+combined_plot <- plot_grid(plot_sex, plot_age, plot_smoking, plot_pack,
+                           nrow = 2, ncol = 2,
+                           labels = c("A", "B", "C", "D"))
+
+# Display combined plot
+print(combined_plot)
 ```

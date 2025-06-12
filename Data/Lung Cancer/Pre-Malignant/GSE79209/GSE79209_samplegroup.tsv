@@ -1,83 +1,83 @@
-Sample	Condition	Description
-GSM2088002	Malignant	Subject L1
-GSM2088003	Malignant	Subject L10
-GSM2088004	Malignant	Subject L11
-GSM2088005	Malignant	Subject L12
-GSM2088006	Malignant	Subject L13
-GSM2088007	Malignant	Subject L14
-GSM2088008	Malignant	Subject L15
-GSM2088009	Malignant	Subject L16
-GSM2088010	Malignant	Subject L17
-GSM2088011	Malignant	Subject L18
-GSM2088012	Malignant	Subject L19
-GSM2088013	Normal	Subject L2
-GSM2088014	Normal	Subject L20
-GSM2088015	Malignant	Subject L21
-GSM2088016	Malignant	Subject L22
-GSM2088017	Normal	Subject L23
-GSM2088018	Malignant	Subject L24
-GSM2088019	Normal	Subject L25
-GSM2088020	Normal	Subject L26
-GSM2088021	Normal	Subject L27
-GSM2088022	Normal	Subject L28
-GSM2088023	Malignant	Subject L29
-GSM2088024	Malignant	Subject L3
-GSM2088025	Normal	Subject L30
-GSM2088026	Normal	Subject L31
-GSM2088027	Normal	Subject L32
-GSM2088028	Normal	Subject L33
-GSM2088029	Malignant	Subject L34
-GSM2088030	Malignant	Subject L35
-GSM2088031	Malignant	Subject L36
-GSM2088032	Malignant	Subject L37
-GSM2088033	Normal	Subject L38
-GSM2088034	Malignant	Subject L39
-GSM2088035	Malignant	Subject L4
-GSM2088036	Normal	Subject L40
-GSM2088037	Normal	Subject L41
-GSM2088038	Normal	Subject L42
-GSM2088039	Malignant	Subject L43
-GSM2088040	Malignant	Subject L44
-GSM2088041	Malignant	Subject L45
-GSM2088042	Malignant	Subject L46
-GSM2088043	Malignant	Subject L47
-GSM2088044	Normal	Subject L48
-GSM2088045	Normal	Subject L49
-GSM2088046	Malignant	Subject L5
-GSM2088047	Malignant	Subject L50
-GSM2088048	Normal	Subject L51
-GSM2088049	Normal	Subject L52
-GSM2088050	Malignant	Subject L53
-GSM2088051	Normal	Subject L54
-GSM2088052	Malignant	Subject L55
-GSM2088053	Malignant	Subject L56
-GSM2088054	Malignant	Subject L57
-GSM2088055	Normal	Subject L58
-GSM2088056	Normal	Subject L59
-GSM2088057	Malignant	Subject L6
-GSM2088058	Malignant	Subject L60
-GSM2088059	Malignant	Subject L61
-GSM2088060	Malignant	Subject L62
-GSM2088061	Normal	Subject L63
-GSM2088062	Malignant	Subject L64
-GSM2088063	Malignant	Subject L65
-GSM2088064	Normal	Subject L66
-GSM2088065	Malignant	Subject L67
-GSM2088066	Malignant	Subject L68
-GSM2088067	Normal	Subject L69
-GSM2088068	Malignant	Subject L7
-GSM2088069	Malignant	Subject L70
-GSM2088070	Malignant	Subject L71
-GSM2088071	Malignant	Subject L72
-GSM2088072	Malignant	Subject L73
-GSM2088073	Malignant	Subject L74
-GSM2088074	Malignant	Subject L75
-GSM2088075	Malignant	Subject L76 metaplasia
-GSM2088076	Malignant	Subject L77 metaplasia
-GSM2088077	Malignant	Subject L78 metaplasia
-GSM2088078	Malignant	Subject L79 metaplasia
-GSM2088079	Malignant	Subject L8
-GSM2088080	Malignant	Subject L80 metaplasia
-GSM2088081	Malignant	Subject L81 metaplasia
-GSM2088082	Malignant	Subject L82 metaplasia
-GSM2088083	Malignant	Subject L9
+Sample	Condition	Age	Sex	Smoking status	Pack years	Description		
+GSM2088002	Mild dysplasia	69	Male	Former smoker	58	Subject L1		
+GSM2088003	Mild dysplasia	50	Female	Current smoker	34	Subject L10		
+GSM2088004	Moderate dysplasia	49	Male	Current smoker	35	Subject L11		
+GSM2088005	Mild dysplasia	57	Male	Current smoker	40	Subject L12		
+GSM2088006	Mild dysplasia	64	Female	Former smoker	37.58	Subject L13		
+GSM2088007	Moderate dysplasia	69	Male	Current smoker	65	Subject L14		
+GSM2088008	Mild dysplasia	55	Male	Current smoker	50	Subject L15		
+GSM2088009	Moderate dysplasia	52	Male	Current smoker	65	Subject L16		
+GSM2088010	Mild dysplasia	71	Male	Former smoker	30	Subject L17		
+GSM2088011	Mild dysplasia	70	Male	Current smoker	51	Subject L18		
+GSM2088012	Moderate dysplasia	68	Male	Former smoker	42.5	Subject L19		
+GSM2088013	Hyperplasia	58	Female	Former smoker	35	Subject L2		
+GSM2088014	Hyperplasia	54	Female	Former smoker	41	Subject L20		
+GSM2088015	Mild dysplasia	66	Male	Current smoker	57	Subject L21		
+GSM2088016	Mild dysplasia	70	Female	Current smoker	54	Subject L22		
+GSM2088017	Hyperplasia	66	Male	Former smoker	26.25	Subject L23		
+GSM2088018	Mild dysplasia	57	Female	Current smoker	37	Subject L24		
+GSM2088019	Normal	63	Male	Current smoker	46	Subject L25		
+GSM2088020	Hyperplasia	71	Male	Former smoker	38	Subject L26		
+GSM2088021	Normal	71	Male	Former smoker	54	Subject L27		
+GSM2088022	Hyperplasia	60	Male	Former smoker	30	Subject L28		
+GSM2088023	Mild dysplasia	71	Male	Former smoker	50.6	Subject L29		
+GSM2088024	Mild dysplasia	58	Male	Current smoker	37	Subject L3		
+GSM2088025	Normal	57	Male	Current smoker	41	Subject L30		
+GSM2088026	Hyperplasia	60	Female	Former smoker	60.8	Subject L31		
+GSM2088027	Normal	70	Female	Former smoker	40	Subject L32		
+GSM2088028	Hyperplasia	71	Male	Former smoker	114	Subject L33		
+GSM2088029	Moderate dysplasia	71	Male	Former smoker	53	Subject L34		
+GSM2088030	Mild dysplasia	71	Male	Former smoker	36.4	Subject L35		
+GSM2088031	Moderate dysplasia	72	Male	Former smoker	47	Subject L36		
+GSM2088032	Severe dysplasia	67	Male	Current smoker	53	Subject L37		
+GSM2088033	Normal	57	Male	Current smoker	40	Subject L38		
+GSM2088034	Moderate dysplasia	59	Male	Former smoker	40	Subject L39		
+GSM2088035	Moderate dysplasia	65	Female	Former smoker	41	Subject L4		
+GSM2088036	Normal	72	Female	Current smoker	58.24	Subject L40		
+GSM2088037	Normal	68	Female	Former smoker	51.25	Subject L41		
+GSM2088038	Normal	73	Male	Current smoker	53	Subject L42		
+GSM2088039	Mild dysplasia	69	Female	Current smoker	42	Subject L43		
+GSM2088040	Mild dysplasia	69	Male	Former smoker	108	Subject L44		
+GSM2088041	Moderate dysplasia	51	Male	Former smoker	63.43	Subject L45		
+GSM2088042	Mild dysplasia	49	Male	Former smoker	32	Subject L46		
+GSM2088043	Mild dysplasia	71	Male	Former smoker	49.5	Subject L47		
+GSM2088044	Normal	61	Male	Current smoker	35	Subject L48		
+GSM2088045	Hyperplasia	58	Male	Former smoker	77	Subject L49		
+GSM2088046	Mild dysplasia	54	Male	Current smoker	32.5	Subject L5		
+GSM2088047	Moderate dysplasia	64	Female	Current smoker	50	Subject L50		
+GSM2088048	Normal	60	Male	Current smoker	42	Subject L51		
+GSM2088049	Normal	68	Female	Former smoker	47	Subject L52		
+GSM2088050	Mild dysplasia	63	Female	Former smoker	45	Subject L53		
+GSM2088051	Hyperplasia	59	Male	Former smoker	42.66	Subject L54		
+GSM2088052	Mild dysplasia	60	Female	Former smoker	32.5	Subject L55		
+GSM2088053	Mild dysplasia	67	Male	Former smoker	35.5	Subject L56		
+GSM2088054	Mild dysplasia	64	Male	Current smoker	50.6	Subject L57		
+GSM2088055	Hyperplasia	67	Male	Current smoker	51	Subject L58		
+GSM2088056	Hyperplasia	64	Male	Former smoker	31.5	Subject L59		
+GSM2088057	Mild dysplasia	68	Male	Current smoker	69	Subject L6		
+GSM2088058	Moderate dysplasia	74	Male	Current smoker	36.8	Subject L60		
+GSM2088059	Mild dysplasia	77	Female	Current smoker	48	Subject L61		
+GSM2088060	Mild dysplasia	52	Male	Former smoker	34	Subject L62		
+GSM2088061	Hyperplasia	65	Female	Current smoker	33.25	Subject L63		
+GSM2088062	Moderate dysplasia	58	Male	Current smoker	40	Subject L64		
+GSM2088063	Mild dysplasia	49	Female	Former smoker	32	Subject L65		
+GSM2088064	Normal	67	Female	Current smoker	45	Subject L66		
+GSM2088065	Mild dysplasia	64	Male	Current smoker	35	Subject L67		
+GSM2088066	Mild dysplasia	67	Female	Former smoker	49.5	Subject L68		
+GSM2088067	Hyperplasia	72	Male	Current smoker	57	Subject L69		
+GSM2088068	Severe dysplasia	61	Male	Former smoker	51	Subject L7		
+GSM2088069	Mild dysplasia	57	Male	Former smoker	76	Subject L70		
+GSM2088070	Mild dysplasia	54	Male	Current smoker	46.8	Subject L71		
+GSM2088071	Mild dysplasia	54	Female	Current smoker	90	Subject L72		
+GSM2088072	Mild dysplasia	47	Male	Former smoker	33	Subject L73		
+GSM2088073	Mild dysplasia	56	Male	Current smoker	39	Subject L74		
+GSM2088074	Severe dysplasia	72	Male	Current smoker	52	Subject L75		
+GSM2088075	Metaplasia	60	Female	Current smoker	65.7	Subject L76		
+GSM2088076	Metaplasia	61	Male	Current smoker	43.75	Subject L77		
+GSM2088077	Metaplasia	73	Male	Former smoker	58	Subject L78		
+GSM2088078	Metaplasia	63	Female	Former smoker	41.49	Subject L79		
+GSM2088079	Mild dysplasia	53	Female	Former smoker	38	Subject L8		
+GSM2088080	Metaplasia	57	Female	Former smoker	30	Subject L80		
+GSM2088081	Metaplasia	65	Male	Current smoker	35	Subject L81		
+GSM2088082	Metaplasia	59	Female	Current smoker	51	Subject L82		
+GSM2088083	Mild dysplasia	65	Female	Former smoker	36	Subject L9		

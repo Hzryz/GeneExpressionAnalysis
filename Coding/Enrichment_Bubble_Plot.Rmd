@@ -18,7 +18,7 @@ library(tidyverse)
 # Load your dataset from a file
 ```{r}
 # Load your dataset and immediately convert to a standard data frame
-data <- as.data.frame(read_delim("~/GeneExpressionAnalysis/Data/Lung Cancer/KEGG.txt"))
+data <- as.data.frame(read_delim("~/GeneExpressionAnalysis/Data/Lung Cancer/GO_BP.txt"))
 
 # Check column names to ensure proper referencing
 print(colnames(data))
@@ -64,7 +64,7 @@ ggplot(data, aes(x = logFoldEnrichment, y = Term)) +
   scale_size_continuous(name = "GeneCount", range = c(3, 15)) +
   scale_color_gradient(name = "-log10(P-value)", low = "blue", high = "red", limits = color_limits) +
   labs(
-    title = "Top Pathway",
+    title = "Top Biological Process",
     x = "Rich Factor",
     y = "Pathway of SAA2 Family Geneset"
   ) +
