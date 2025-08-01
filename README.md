@@ -68,6 +68,6 @@ Muhammad Zam Hazri Bin Zamri (2025). *Investigation of the Role of SAA2 in Pulmo
 
 For any inquiries or collaboration, please contact:  
 Muhammad Zam Hazri Bin Zamri  
-Email: zamhazri@gmail.com 
+Email: zamhazri@gmail.com
 Faculty of Science and Technology,  
 Universiti Kebangsaan Malaysia
